@@ -12,9 +12,9 @@ module TypeScriptedOData {
     }
     
     export interface IODataQuery {
-        select<TResult>(entity: TResult, properties: TResult[]): ODataQuery;
-        expand<TEntity, TRelatedEntity>(entity: TEntity, relatedEntity: TRelatedEntity): ODataQuery;
-        take(amount: number): ODataQuery;
+        select(properties: string[], subQueryies?: IODataQuery[]): IODataQuery;
+        expand<TEntity, TRelatedEntity>(entity: TEntity, relatedEntity: TRelatedEntity): IODataQuery;
+        take(amount: number): IODataQuery;
         compile(): string;
     }
 
@@ -24,26 +24,13 @@ module TypeScriptedOData {
         constructor() {
             this.queryOptions = <IQueryOptions>{};
         }
-
-        select<TResult>(entity: TResult, properties: TResult[]): ODataQuery {
-            var entityProperties = properties.map(t => {
-                return entity[<any>t];
-            });
-            this.queryOptions.$select = "$select=" + entityProperties.join(",");
-            return this;
-        }
-
-        expand<TEntity>(entity: TEntity, properties: TEntity[], subQueries?: ODataQuery[]): ODataQuery {
-            var entityProperties = properties.map(t => {
-                return entity[<any>t];
-            });
-
-            if (subQueries) {
-                if (properties.length != subQueries.length) {
+        
+        private compileSubQueries(properties: string[], subQueries: IODataQuery[]) {
+            if (properties.length != subQueries.length) {
                     throw "There must be one subquery per entity, use null if no subquery is required"
                 }
                 this.queryOptions.$expand = "$expand=";
-                entityProperties.forEach((property, index) => {
+                properties.forEach((property, index) => {
                     if (index > 0){
                         this.queryOptions.$expand += ",";
                     }
@@ -52,8 +39,22 @@ module TypeScriptedOData {
                         this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
                     }
                 });
+        }
+
+        select(properties: string[], subQueries?: IODataQuery[]): ODataQuery {
+            if (subQueries) {
+                this.compileSubQueries(properties, subQueries);
             } else {
-                this.queryOptions.$expand = "$expand=" + entityProperties.join(",");
+                this.queryOptions.$select = "$select=" + properties.join(",");
+            }
+            return this;
+        }
+
+        expand(properties: string[], subQueries?: IODataQuery[]): ODataQuery {
+            if (subQueries) {
+                this.compileSubQueries(properties, subQueries);
+            } else {
+                this.queryOptions.$expand = "$expand=" + properties.join(",");
             }
             return this;
         }

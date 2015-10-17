@@ -4,35 +4,37 @@ var TypeScriptedOData;
         function ODataQuery() {
             this.queryOptions = {};
         }
-        ODataQuery.prototype.select = function (entity, properties) {
-            var entityProperties = properties.map(function (t) {
-                return entity[t];
-            });
-            this.queryOptions.$select = "$select=" + entityProperties.join(",");
-            return this;
-        };
-        ODataQuery.prototype.expand = function (entity, properties, subQueries) {
+        ODataQuery.prototype.compileSubQueries = function (properties, subQueries) {
             var _this = this;
-            var entityProperties = properties.map(function (t) {
-                return entity[t];
-            });
-            if (subQueries) {
-                if (properties.length != subQueries.length) {
-                    throw "There must be one subquery per entity, use null if no subquery is required";
+            if (properties.length != subQueries.length) {
+                throw "There must be one subquery per entity, use null if no subquery is required";
+            }
+            this.queryOptions.$expand = "$expand=";
+            properties.forEach(function (property, index) {
+                if (index > 0) {
+                    _this.queryOptions.$expand += ",";
                 }
-                this.queryOptions.$expand = "$expand=";
-                entityProperties.forEach(function (property, index) {
-                    if (index > 0) {
-                        _this.queryOptions.$expand += ",";
-                    }
-                    _this.queryOptions.$expand += property;
-                    if (subQueries[index]) {
-                        _this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
-                    }
-                });
+                _this.queryOptions.$expand += property;
+                if (subQueries[index]) {
+                    _this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
+                }
+            });
+        };
+        ODataQuery.prototype.select = function (properties, subQueries) {
+            if (subQueries) {
+                this.compileSubQueries(properties, subQueries);
             }
             else {
-                this.queryOptions.$expand = "$expand=" + entityProperties.join(",");
+                this.queryOptions.$select = "$select=" + properties.join(",");
+            }
+            return this;
+        };
+        ODataQuery.prototype.expand = function (properties, subQueries) {
+            if (subQueries) {
+                this.compileSubQueries(properties, subQueries);
+            }
+            else {
+                this.queryOptions.$expand = "$expand=" + properties.join(",");
             }
             return this;
         };

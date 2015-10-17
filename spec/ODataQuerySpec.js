@@ -15,25 +15,6 @@ var AnotherRelatedEntity = (function () {
     }
     return AnotherRelatedEntity;
 })();
-var TestEntityProperties;
-(function (TestEntityProperties) {
-    TestEntityProperties[TestEntityProperties["Id"] = 0] = "Id";
-    TestEntityProperties[TestEntityProperties["Name"] = 1] = "Name";
-    TestEntityProperties[TestEntityProperties["Created"] = 2] = "Created";
-    TestEntityProperties[TestEntityProperties["Related"] = 3] = "Related";
-    TestEntityProperties[TestEntityProperties["AnotherRelated"] = 4] = "AnotherRelated";
-    TestEntityProperties[TestEntityProperties["RelatedCollection"] = 5] = "RelatedCollection";
-})(TestEntityProperties || (TestEntityProperties = {}));
-var RelatedEntityProperties;
-(function (RelatedEntityProperties) {
-    RelatedEntityProperties[RelatedEntityProperties["Id"] = 0] = "Id";
-    RelatedEntityProperties[RelatedEntityProperties["Title"] = 1] = "Title";
-})(RelatedEntityProperties || (RelatedEntityProperties = {}));
-var AnotherRelatedEntityProperties;
-(function (AnotherRelatedEntityProperties) {
-    AnotherRelatedEntityProperties[AnotherRelatedEntityProperties["Id"] = 0] = "Id";
-    AnotherRelatedEntityProperties[AnotherRelatedEntityProperties["Status"] = 1] = "Status";
-})(AnotherRelatedEntityProperties || (AnotherRelatedEntityProperties = {}));
 describe('ODataQuery', function () {
     var odataQuery;
     beforeEach(function () {
@@ -44,7 +25,7 @@ describe('ODataQuery', function () {
         expect(url).toBe("");
     });
     it("should create $select parameter when selecting specific properties of entity", function () {
-        odataQuery.select(TestEntityProperties, [TestEntityProperties.Id, TestEntityProperties.Name]);
+        odataQuery.select(["Id", "Name"]);
         var url = odataQuery.compile();
         expect(url).toBe("$select=Id,Name");
     });
@@ -54,29 +35,29 @@ describe('ODataQuery', function () {
         expect(url).toBe("$top=50");
     });
     it("should handle both select and take", function () {
-        odataQuery.select(TestEntityProperties, [TestEntityProperties.Id, TestEntityProperties.Name])
+        odataQuery.select(["Id", "Name"])
             .take(50);
         var url = odataQuery.compile();
         expect(url).toBe("$select=Id,Name&$top=50");
     });
     it("should add $expand parameter when expanding entity", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related]);
+        odataQuery.expand(["Related"]);
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related");
     });
     it("should add $expand parameter when expanding entity", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related, TestEntityProperties.AnotherRelated]);
+        odataQuery.expand(["Related", "AnotherRelated"]);
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related,AnotherRelated");
     });
     it("should add sub-$select query to expand", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related], [new TypeScriptedOData.ODataQuery().select(RelatedEntityProperties, [RelatedEntityProperties.Title])]);
+        odataQuery.expand(["Related"], [new TypeScriptedOData.ODataQuery().select(["Title"])]);
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related($select=Title)");
     });
     it("should handle multiple parameters in subquery", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related, TestEntityProperties.RelatedCollection], [new TypeScriptedOData.ODataQuery()
-                .select(RelatedEntityProperties, [RelatedEntityProperties.Title]),
+        odataQuery.expand(["Related", "RelatedCollection"], [new TypeScriptedOData.ODataQuery()
+                .select(["Title"]),
             new TypeScriptedOData.ODataQuery()
                 .take(5)
         ]);
@@ -84,17 +65,17 @@ describe('ODataQuery', function () {
         expect(url).toBe("$expand=Related($select=Title),RelatedCollection($top=5)");
     });
     it("should add sub-$select queries to multiple expands", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related, TestEntityProperties.AnotherRelated], [
-            new TypeScriptedOData.ODataQuery().select(RelatedEntityProperties, [RelatedEntityProperties.Title]),
-            new TypeScriptedOData.ODataQuery().select(AnotherRelatedEntityProperties, [AnotherRelatedEntityProperties.Status])
+        odataQuery.expand(["Related", "AnotherRelated"], [
+            new TypeScriptedOData.ODataQuery().select(["Title"]),
+            new TypeScriptedOData.ODataQuery().select(["Status"])
         ]);
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related($select=Title),AnotherRelated($select=Status)");
     });
     it("should handle one null query with multiple expands", function () {
-        odataQuery.expand(TestEntityProperties, [TestEntityProperties.Related, TestEntityProperties.AnotherRelated], [
+        odataQuery.expand(["Related", "AnotherRelated"], [
             null,
-            new TypeScriptedOData.ODataQuery().select(AnotherRelatedEntityProperties, [AnotherRelatedEntityProperties.Status])
+            new TypeScriptedOData.ODataQuery().select(["Status"])
         ]);
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related,AnotherRelated($select=Status)");
