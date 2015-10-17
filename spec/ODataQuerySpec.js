@@ -80,4 +80,21 @@ describe('ODataQuery', function () {
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related,AnotherRelated($select=Status)");
     });
+    describe("$count", function () {
+        it("should default $count to true when calling count()", function () {
+            odataQuery.count();
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=true");
+        });
+        it("should accept count(true)", function () {
+            odataQuery.count(true);
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=true");
+        });
+        it("should set $count=false when calling count(false)", function () {
+            odataQuery.count(false);
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=false");
+        });
+    });
 });

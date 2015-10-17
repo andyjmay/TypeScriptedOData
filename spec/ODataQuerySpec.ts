@@ -100,4 +100,24 @@ describe('ODataQuery', () => {
         var url = odataQuery.compile();
         expect(url).toBe("$expand=Related,AnotherRelated($select=Status)")
     });
+    
+    describe("$count", () => {
+        it("should default $count to true when calling count()", () => {
+            odataQuery.count();
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=true");
+        });
+
+        it("should accept count(true)", () => {
+            odataQuery.count(true);
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=true");
+        });
+
+        it("should set $count=false when calling count(false)", () => {
+            odataQuery.count(false);
+            var url = odataQuery.compile();
+            expect(url).toBe("$count=false");
+        });
+    });
 });

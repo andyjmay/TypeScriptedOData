@@ -63,6 +63,15 @@ module TypeScriptedOData {
             this.queryOptions.$top = "$top=" + amount;
             return this;
         }
+        
+        count(includeCount?: boolean): ODataQuery {
+            if (includeCount === false) {
+                this.queryOptions.$count = "$count=false";
+            } else {
+                this.queryOptions.$count = "$count=true";
+            }
+            return this;
+        }
 
         compile(): string {
             var queryString = "";
@@ -83,6 +92,9 @@ module TypeScriptedOData {
                     queryString += "&";
                 }
                 queryString += this.queryOptions.$top;
+            }
+            if (this.queryOptions.$count){
+                queryString += this.queryOptions.$count;
             }
             return queryString;
         }

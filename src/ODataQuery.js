@@ -42,6 +42,15 @@ var TypeScriptedOData;
             this.queryOptions.$top = "$top=" + amount;
             return this;
         };
+        ODataQuery.prototype.count = function (includeCount) {
+            if (includeCount === false) {
+                this.queryOptions.$count = "$count=false";
+            }
+            else {
+                this.queryOptions.$count = "$count=true";
+            }
+            return this;
+        };
         ODataQuery.prototype.compile = function () {
             var queryString = "";
             if (this.queryOptions.$select) {
@@ -61,6 +70,9 @@ var TypeScriptedOData;
                     queryString += "&";
                 }
                 queryString += this.queryOptions.$top;
+            }
+            if (this.queryOptions.$count) {
+                queryString += this.queryOptions.$count;
             }
             return queryString;
         };
