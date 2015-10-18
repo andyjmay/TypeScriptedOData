@@ -4,29 +4,26 @@ var TypeScriptedOData;
         function ODataQuery() {
             this.queryOptions = {};
         }
-        ODataQuery.prototype.compileSubQueries = function (properties, subQueries) {
-            var _this = this;
-            if (properties.length != subQueries.length) {
-                throw "There must be one subquery per entity, use null if no subquery is required";
-            }
-            this.queryOptions.$expand = "$expand=";
-            properties.forEach(function (property, index) {
-                if (index > 0) {
-                    _this.queryOptions.$expand += ",";
-                }
-                _this.queryOptions.$expand += property;
-                if (subQueries[index]) {
-                    _this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
-                }
-            });
-        };
         ODataQuery.prototype.select = function (properties) {
             this.queryOptions.$select = "$select=" + properties.join(",");
             return this;
         };
         ODataQuery.prototype.expand = function (properties, subQueries) {
+            var _this = this;
             if (subQueries) {
-                this.compileSubQueries(properties, subQueries);
+                if (properties.length != subQueries.length) {
+                    throw "There must be one subquery per entity, use null if no subquery is required";
+                }
+                this.queryOptions.$expand = "$expand=";
+                properties.forEach(function (property, index) {
+                    if (index > 0) {
+                        _this.queryOptions.$expand += ",";
+                    }
+                    _this.queryOptions.$expand += property;
+                    if (subQueries[index]) {
+                        _this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
+                    }
+                });
             }
             else {
                 this.queryOptions.$expand = "$expand=" + properties.join(",");

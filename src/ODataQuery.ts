@@ -24,10 +24,16 @@ module TypeScriptedOData {
         constructor() {
             this.queryOptions = <IQueryOptions>{};
         }
-        
-        private compileSubQueries(properties: string[], subQueries: IODataQuery[]) {
-            if (properties.length != subQueries.length) {
-                    throw "There must be one subquery per entity, use null if no subquery is required"
+
+        select(properties: string[]): ODataQuery {
+            this.queryOptions.$select = "$select=" + properties.join(",");
+            return this;
+        }
+
+        expand(properties: string[], subQueries?: IODataQuery[]): ODataQuery {
+            if (subQueries) {
+                if (properties.length != subQueries.length) {
+                    throw "There must be one subquery per entity, use null if no subquery is required";
                 }
                 this.queryOptions.$expand = "$expand=";
                 properties.forEach((property, index) => {
@@ -39,16 +45,6 @@ module TypeScriptedOData {
                         this.queryOptions.$expand += "(" + subQueries[index].compile() + ")";
                     }
                 });
-        }
-
-        select(properties: string[]): ODataQuery {
-            this.queryOptions.$select = "$select=" + properties.join(",");
-            return this;
-        }
-
-        expand(properties: string[], subQueries?: IODataQuery[]): ODataQuery {
-            if (subQueries) {
-                this.compileSubQueries(properties, subQueries);
             } else {
                 this.queryOptions.$expand = "$expand=" + properties.join(",");
             }
