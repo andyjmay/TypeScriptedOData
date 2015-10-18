@@ -41,12 +41,8 @@ module TypeScriptedOData {
                 });
         }
 
-        select(properties: string[], subQueries?: IODataQuery[]): ODataQuery {
-            if (subQueries) {
-                this.compileSubQueries(properties, subQueries);
-            } else {
-                this.queryOptions.$select = "$select=" + properties.join(",");
-            }
+        select(properties: string[]): ODataQuery {
+            this.queryOptions.$select = "$select=" + properties.join(",");
             return this;
         }
 

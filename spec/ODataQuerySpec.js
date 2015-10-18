@@ -24,6 +24,11 @@ describe('ODataQuery', function () {
         var url = odataQuery.compile();
         expect(url).toBe("");
     });
+    it("should create $select parameter when selecting one property", function () {
+        odataQuery.select(["Name"]);
+        var url = odataQuery.compile();
+        expect(url).toBe("$select=Name");
+    });
     it("should create $select parameter when selecting specific properties of entity", function () {
         odataQuery.select(["Id", "Name"]);
         var url = odataQuery.compile();

@@ -20,13 +20,8 @@ var TypeScriptedOData;
                 }
             });
         };
-        ODataQuery.prototype.select = function (properties, subQueries) {
-            if (subQueries) {
-                this.compileSubQueries(properties, subQueries);
-            }
-            else {
-                this.queryOptions.$select = "$select=" + properties.join(",");
-            }
+        ODataQuery.prototype.select = function (properties) {
+            this.queryOptions.$select = "$select=" + properties.join(",");
             return this;
         };
         ODataQuery.prototype.expand = function (properties, subQueries) {
