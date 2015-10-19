@@ -113,4 +113,62 @@ describe('ODataQuery', () => {
             expect(url).toBe("$count=false");
         });
     });
+
+    describe("filter", () => {
+        it("should add single quote around string parameter when filtering", () => {
+            odataQuery.filter(new TypeScriptedOData.FilterQuery({
+                    property: "Name",
+                    operator: TypeScriptedOData.ComparisonOperator.Equals,
+                    propertyValue: "Steve" 
+                })
+            );
+            var url = odataQuery.compile();
+            expect(url).toBe("$filter=Name eq 'Steve'");
+        });
+
+        it("should not add any quotes around number parameter when filtering", () => {
+            odataQuery.filter(new TypeScriptedOData.FilterQuery({
+                    property: "Cost",
+                    operator: TypeScriptedOData.ComparisonOperator.LessThan,
+                    propertyValue: 150.5
+                })
+            );
+            var url = odataQuery.compile();
+            expect(url).toBe("$filter=Cost lt 150.5");
+        });
+
+        it('should handle multiple filters with "and"', () => {
+            odataQuery.filter(new TypeScriptedOData.FilterQuery({
+                    property: "Name",
+                    operator: TypeScriptedOData.ComparisonOperator.Equals,
+                    propertyValue: "Steve"
+                })
+                .and
+                (new TypeScriptedOData.FilterQuery({
+                    property: "Price",
+                    operator: TypeScriptedOData.ComparisonOperator.GreaterThan,
+                    propertyValue: 2.55
+                }))
+            );
+            var url = odataQuery.compile();
+            expect(url).toBe("$filter=Name eq 'Steve' and Price gt 2.55");
+        });
+
+        it('should handle multiple filters with "or"', () => {
+            odataQuery.filter(new TypeScriptedOData.FilterQuery({
+                    property: "Name",
+                    operator: TypeScriptedOData.ComparisonOperator.Equals,
+                    propertyValue: "Steve"
+                })
+                .or
+                (new TypeScriptedOData.FilterQuery({
+                    property: "Price",
+                    operator: TypeScriptedOData.ComparisonOperator.GreaterThan,
+                    propertyValue: 2.55
+                }))
+            );
+            var url = odataQuery.compile();
+            expect(url).toBe("$filter=Name eq 'Steve' or Price gt 2.55");
+        });
+    });
 });
